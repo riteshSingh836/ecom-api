@@ -1,0 +1,34 @@
+to do -
+
+getallProducts
+add a product
+get one product
+filter product
+update product
+delete product
+
+
+These below required user authentication & authorization--
+rate product
+add items to cart
+get items of cart
+Remove items from cart
+
+Therefore we need to create 2 APIs - sign up & sign in - user.controller.js
+
+
+/*** $unwind aggregation ***/
+
+db.products.aggregate([
+    {$unwind: "$ratings"},  //--> 1. create document for ratings
+    {$group: {_id: "$name", averageRating: {$avg: "$ratings.rating"}}}  //--> 2. Group rating per product & get average
+])
+
+db.products.aggregate([
+    {$project: {name:1, countOfRating:{
+        $cond: {if: {$isArray: "$ratings"}, then: {$size: "$ratings"},
+        else:0}
+    }}},
+    {$sort: {countOfRating:-1}},
+    {$limit: 1}
+])
